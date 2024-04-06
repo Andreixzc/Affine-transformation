@@ -10,29 +10,26 @@ public class App {
         String imagePath = "Arby_o.jpg";
         int[][] pixelMatrix = imageToMatrix(imagePath);
         matrixToImage(translate(pixelMatrix, 300, 300), "transladada.jpg");
+        matrixToImage(resize(pixelMatrix, 1920, 1080), "resized.jpg");
 
     }
 
     public static int[][] imageToMatrix(String imagePath) {
         try {
-        
+
             File imageFile = new File(imagePath);
             BufferedImage image = ImageIO.read(imageFile);
 
-        
             int width = image.getWidth();
             int height = image.getHeight();
 
-            
             int[][] matrix = new int[height][width];
 
-      
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-              
+
                     int rgb = image.getRGB(x, y);
 
-            
                     int red = (rgb >> 16) & 0xFF;
                     int green = (rgb >> 8) & 0xFF;
                     int blue = rgb & 0xFF;
@@ -45,7 +42,7 @@ public class App {
             return matrix;
         } catch (IOException e) {
             e.printStackTrace();
-            return null; 
+            return null;
         }
     }
 
@@ -64,7 +61,22 @@ public class App {
     }
 
     public static int[][] resize(int[][] originalMatrix, int x, int y) {
+        int originalHeight = originalMatrix.length;
+        int originalWidth = originalMatrix[0].length;
         int[][] resizedMatrix = new int[y][x];
+
+        double xScale = (double) originalWidth / x;
+        double yScale = (double) originalHeight / y;
+        for (int newY = 0; newY < y; newY++) {
+            for (int newX = 0; newX < x; newX++) {
+                int originalX = (int) Math.floor(newX * xScale);
+                int originalY = (int) Math.floor(newY * yScale);
+                originalX = Math.min(originalX, originalWidth - 1);
+                originalY = Math.min(originalY, originalHeight - 1);
+                resizedMatrix[newY][newX] = originalMatrix[originalY][originalX];
+            }
+        }
+
         return resizedMatrix;
     }
 
@@ -73,13 +85,11 @@ public class App {
             int height = matrix.length;
             int width = matrix[0].length;
 
-            
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
-       
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                
+
                     int grayscale = matrix[y][x];
                     int rgb = (grayscale << 16) | (grayscale << 8) | grayscale;
 
